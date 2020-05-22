@@ -14,7 +14,7 @@ const app = new Koa();
         if (ctx.query.url) {
             const page = await browser.newPage();
             await page.goto(ctx.query.url);
-            if ((await page.content()).includes("cloudflare"))
+            if ((await page.content()).includes("cf-browser-verification"))
                 await page.waitForNavigation();
             ctx.body = await page.content();
             await page.close();
