@@ -1,5 +1,7 @@
 const puppeteer = require('puppeteer-extra');
-const StealthPlugin = require('puppeteer-extra-plugin-stealth')
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const AdblockerPlugin = require('puppeteer-extra-plugin-adblocker');
+puppeteer.use(AdblockerPlugin());
 puppeteer.use(StealthPlugin());
 const Koa = require('koa');
 const app = new Koa();
