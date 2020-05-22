@@ -15,9 +15,9 @@ const app = new Koa();
     app.use(async ctx => {
         if (ctx.query.url) {
             const page = await browser.newPage();
-            await page.goto(ctx.query.url);
+            await page.goto(ctx.query.url, {timeout: 30000, waitUntil: 'domcontentloaded'});
             if ((await page.content()).includes("cf-browser-verification"))
-                await page.waitForNavigation();
+                await page.waitForNavigation({timeout: 30000, waitUntil: 'domcontentloaded'});
             ctx.body = await page.content();
             await page.close();
         }
