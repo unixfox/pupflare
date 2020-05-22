@@ -5,11 +5,13 @@ const Koa = require('koa');
 const app = new Koa();
 
 (async () => {
-    const browser = await puppeteer.launch({
+    let options = {
         headless: true,
-        executablePath: '/usr/bin/chromium-browser',
         args: ['--no-sandbox', '--disable-setuid-sandbox']
-    });
+    };
+    if (process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD)
+        options.executablePath = '/usr/bin/chromium-browser';
+    const browser = await puppeteer.launch(options);
     app.use(async ctx => {
         if (ctx.query.url) {
             const page = await browser.newPage();
