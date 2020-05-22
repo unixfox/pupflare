@@ -6,6 +6,11 @@ puppeteer.use(StealthPlugin());
 const Koa = require('koa');
 const app = new Koa();
 
+const headersToRemove = [
+    "host", "user-agent", "accept", "accept-encoding", "content-length",
+    "forwarded", "x-forwarded-proto", "x-forwarded-for", "x-cloud-trace-context"
+];
+
 (async () => {
     let options = {
         headless: true,
@@ -16,15 +21,21 @@ const app = new Koa();
     const browser = await puppeteer.launch(options);
     app.use(async ctx => {
         if (ctx.query.url) {
+            const url = ctx.url.replace("/?url=", "");
             const page = await browser.newPage();
-            await page.goto(ctx.query.url, {timeout: 30000, waitUntil: 'domcontentloaded'});
+            let headers = ctx.headers;
+            headersToRemove.forEach(header => {
+                delete headers[header];
+            });
+            await page.setExtraHTTPHeaders(headers);            
+            await page.goto(url, { timeout: 30000, waitUntil: 'domcontentloaded' });
             if ((await page.content()).includes("cf-browser-verification"))
-                await page.waitForNavigation({timeout: 30000, waitUntil: 'domcontentloaded'});
+                await page.waitForNavigation({ timeout: 30000, waitUntil: 'domcontentloaded' });
             ctx.body = await page.content();
             await page.close();
         }
         else {
-            ctx.body = "Please specify the URL query string.";
+            ctx.body = "Please specify the URL in the 'url' query string.";
         }
     });
     app.listen(3000);
