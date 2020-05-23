@@ -13,7 +13,7 @@ const headersToRemove = [
     "host", "user-agent", "accept", "accept-encoding", "content-length",
     "forwarded", "x-forwarded-proto", "x-forwarded-for", "x-cloud-trace-context"
 ];
-const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive", "Connection", "content-encoding"];
+const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive", "Connection", "content-encoding", "set-cookie"];
 
 (async () => {
     let options = {
@@ -78,18 +78,23 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
                     response = await page.waitForNavigation({ timeout: 30000, waitUntil: 'domcontentloaded' });
                 responseBody = await page.content();
                 responseHeaders = response.headers();
+                const cookies = await page.cookies();
+                if (cookies)
+                    cookies.forEach(cookie => {
+                        const { name, value, secure, expires, domain, ...options } = cookie;
+                        ctx.cookies.set(cookie.name, cookie.value, options);
+                    });
                 await page.close();
             } catch (error) {
                 if (!error.toString().includes("ERR_BLOCKED_BY_CLIENT"))
                     throw (error);
             }
             responseHeadersToRemove.forEach(header => {
-               delete responseHeaders[header];
+                delete responseHeaders[header];
             });
             Object.keys(responseHeaders).forEach(header => {
-               ctx.set(header, jsesc(responseHeaders[header]));
+                ctx.set(header, jsesc(responseHeaders[header]));
             });
-            ctx.response.headers = responseHeaders;
             ctx.body = responseBody;
         }
         else {
