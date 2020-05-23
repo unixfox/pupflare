@@ -4,12 +4,16 @@ const AdblockerPlugin = require('puppeteer-extra-plugin-adblocker');
 puppeteer.use(AdblockerPlugin());
 puppeteer.use(StealthPlugin());
 const Koa = require('koa');
+const bodyParser = require('koa-bodyparser');
 const app = new Koa();
+app.use(bodyParser());
+const jsesc = require('jsesc');
 
 const headersToRemove = [
     "host", "user-agent", "accept", "accept-encoding", "content-length",
     "forwarded", "x-forwarded-proto", "x-forwarded-for", "x-cloud-trace-context"
 ];
+const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive", "Connection", "content-encoding"];
 
 (async () => {
     let options = {
@@ -22,17 +26,71 @@ const headersToRemove = [
     app.use(async ctx => {
         if (ctx.query.url) {
             const url = ctx.url.replace("/?url=", "");
+            let responseBody;
+            let responseHeaders;
             const page = await browser.newPage();
+            if (ctx.method == "POST") {
+                await page.removeAllListeners('request');
+                await page.setRequestInterception(true);
+                page.on('request', interceptedRequest => {
+                    var data = {
+                        'method': 'POST',
+                        'postData': ctx.request.rawBody
+                    };
+                    interceptedRequest.continue(data);
+                });
+            }
+            const client = await page.target().createCDPSession();
+            await client.send('Network.setRequestInterception', {
+                patterns: [{
+                    urlPattern: '*',
+                    resourceType: 'Document',
+                    interceptionStage: 'HeadersReceived'
+                }],
+            });
+
+            await client.on('Network.requestIntercepted', async e => {
+                let obj = { interceptionId: e.interceptionId };
+                if (e.isDownload) {
+                    await client.send('Network.getResponseBodyForInterception', {
+                        interceptionId: e.interceptionId
+                    }).then((result) => {
+                        if (result.base64Encoded) {
+                            responseBody = Buffer.from(result.body, 'base64');
+                        }
+                    });
+                    obj['errorReason'] = 'BlockedByClient';
+                    responseHeaders = e.responseHeaders;
+                }
+                await client.send('Network.continueInterceptedRequest', obj);
+                if (e.isDownload)
+                    await page.close();
+            });
             let headers = ctx.headers;
             headersToRemove.forEach(header => {
                 delete headers[header];
             });
-            await page.setExtraHTTPHeaders(headers);            
-            await page.goto(url, { timeout: 30000, waitUntil: 'domcontentloaded' });
-            if ((await page.content()).includes("cf-browser-verification"))
-                await page.waitForNavigation({ timeout: 30000, waitUntil: 'domcontentloaded' });
-            ctx.body = await page.content();
-            await page.close();
+            await page.setExtraHTTPHeaders(headers);
+            try {
+                let response;
+                response = await page.goto(url, { timeout: 30000, waitUntil: 'domcontentloaded' });
+                if ((await page.content()).includes("cf-browser-verification"))
+                    response = await page.waitForNavigation({ timeout: 30000, waitUntil: 'domcontentloaded' });
+                responseBody = await page.content();
+                responseHeaders = response.headers();
+                await page.close();
+            } catch (error) {
+                if (!error.toString().includes("ERR_BLOCKED_BY_CLIENT"))
+                    throw (error);
+            }
+            responseHeadersToRemove.forEach(header => {
+               delete responseHeaders[header];
+            });
+            Object.keys(responseHeaders).forEach(header => {
+               ctx.set(header, jsesc(responseHeaders[header]));
+            });
+            ctx.response.headers = responseHeaders;
+            ctx.body = responseBody;
         }
         else {
             ctx.body = "Please specify the URL in the 'url' query string.";
