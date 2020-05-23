@@ -86,15 +86,13 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
                     });
                 await page.close();
             } catch (error) {
-                if (!error.toString().includes("ERR_BLOCKED_BY_CLIENT"))
-                    throw (error);
+                if (!error.toString().includes("ERR_BLOCKED_BY_CLIENT")) {
+                    ctx.status = 500;
+                    ctx.body = error;
+                }
             }
-            responseHeadersToRemove.forEach(header => {
-                delete responseHeaders[header];
-            });
-            Object.keys(responseHeaders).forEach(header => {
-                ctx.set(header, jsesc(responseHeaders[header]));
-            });
+            responseHeadersToRemove.forEach(header => delete responseHeaders[header]);
+            Object.keys(responseHeaders).forEach(header => ctx.set(header, jsesc(responseHeaders[header])));
             ctx.body = responseBody;
         }
         else {
