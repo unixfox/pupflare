@@ -1,7 +1,5 @@
 const puppeteer = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
-const AdblockerPlugin = require('puppeteer-extra-plugin-adblocker');
-puppeteer.use(AdblockerPlugin());
 puppeteer.use(StealthPlugin());
 const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
@@ -76,7 +74,7 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
                 response = await page.goto(url, { timeout: 30000, waitUntil: 'domcontentloaded' });
                 if ((await page.content()).includes("cf-browser-verification"))
                     response = await page.waitForNavigation({ timeout: 30000, waitUntil: 'domcontentloaded' });
-                responseBody = await page.content();
+                responseBody = await response.text();
                 responseHeaders = response.headers();
                 const cookies = await page.cookies();
                 if (cookies)
