@@ -15,7 +15,7 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
 
 (async () => {
     let options = {
-        headless: true,
+        headless: false,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     };
     if (process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD)
@@ -71,10 +71,14 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
             await page.setExtraHTTPHeaders(headers);
             try {
                 let response;
+                let tryCount = 0;
                 response = await page.goto(url, { timeout: 30000, waitUntil: 'domcontentloaded' });
-                if ((await page.content()).includes("cf-browser-verification"))
-                    response = await page.waitForNavigation({ timeout: 30000, waitUntil: 'domcontentloaded' });
                 responseBody = await response.text();
+                while (responseBody.includes("cf-browser-verification") && tryCount <= 10) {
+                    response = await page.waitForNavigation({ timeout: 30000, waitUntil: 'domcontentloaded' });
+                    responseBody = await response.text();
+                    tryCount++;
+                }
                 responseHeaders = response.headers();
                 const cookies = await page.cookies();
                 if (cookies)
