@@ -88,15 +88,16 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
                         ctx.cookies.set(cookie.name, cookie.value, options);
                     });
                 await page.close();
+
+                responseHeadersToRemove.forEach(header => delete responseHeaders[header]);
+                Object.keys(responseHeaders).forEach(header => ctx.set(header, jsesc(responseHeaders[header])));
+                ctx.body = responseBody;
             } catch (error) {
                 if (!error.toString().includes("ERR_BLOCKED_BY_CLIENT")) {
                     ctx.status = 500;
                     ctx.body = error;
                 }
             }
-            responseHeadersToRemove.forEach(header => delete responseHeaders[header]);
-            Object.keys(responseHeaders).forEach(header => ctx.set(header, jsesc(responseHeaders[header])));
-            ctx.body = responseBody;
         }
         else {
             ctx.body = "Please specify the URL in the 'url' query string.";
