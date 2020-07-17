@@ -6,6 +6,7 @@ const bodyParser = require('koa-bodyparser');
 const app = new Koa();
 app.use(bodyParser());
 const jsesc = require('jsesc');
+const tough_cookie = require('tough-cookie');
 
 const headersToRemove = [
     "host", "user-agent", "accept", "accept-encoding", "content-length",
