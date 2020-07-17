@@ -10,7 +10,8 @@ const tough_cookie = require('tough-cookie');
 
 const headersToRemove = [
     "host", "user-agent", "accept", "accept-encoding", "content-length",
-    "forwarded", "x-forwarded-proto", "x-forwarded-for", "x-cloud-trace-context"
+    "forwarded", "x-forwarded-proto", "x-forwarded-for", "x-cloud-trace-context",
+    "cookie"
 ];
 const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive", "Connection", "content-encoding", "set-cookie"];
 
@@ -25,6 +26,7 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
     app.use(async ctx => {
         if (ctx.query.url) {
             const url = ctx.url.replace("/?url=", "");
+            const parsedUrl = new URL(url);
             let responseBody;
             let responseHeaders;
             const page = await browser.newPage();
@@ -66,10 +68,29 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
                     await page.close();
             });
             let headers = ctx.headers;
+            const inCookies = headers['cookie'];
             headersToRemove.forEach(header => {
                 delete headers[header];
             });
             await page.setExtraHTTPHeaders(headers);
+            if (inCookies) {
+                const cookiesToSet = [];
+                for (let cookieStr of inCookies.split(';')) {
+                    const cookie = tough_cookie.Cookie.parse(cookieStr);
+                    if (!cookie) {
+                        continue;
+                    }
+                    cookiesToSet.push({
+                        name: cookie.key,
+                        value: cookie.value,
+                        sameSite: 'Lax',
+                        domain: parsedUrl.host
+                    });
+                }
+
+                if (cookiesToSet.length > 0)
+                    await page.setCookie(...cookiesToSet);
+            }
             try {
                 let response;
                 let tryCount = 0;
