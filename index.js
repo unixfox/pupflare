@@ -6,10 +6,12 @@ const bodyParser = require('koa-bodyparser');
 const app = new Koa();
 app.use(bodyParser());
 const jsesc = require('jsesc');
+const tough_cookie = require('tough-cookie');
 
 const headersToRemove = [
     "host", "user-agent", "accept", "accept-encoding", "content-length",
-    "forwarded", "x-forwarded-proto", "x-forwarded-for", "x-cloud-trace-context"
+    "forwarded", "x-forwarded-proto", "x-forwarded-for", "x-cloud-trace-context",
+    "cookie"
 ];
 const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive", "Connection", "content-encoding", "set-cookie"];
 
@@ -28,6 +30,7 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
     app.use(async ctx => {
         if (ctx.query.url) {
             const url = ctx.url.replace("/?url=", "");
+            const parsedUrl = new URL(url);
             let responseBody;
             let responseHeaders;
             const page = await browser.newPage();
@@ -69,10 +72,29 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
                     await page.close();
             });
             let headers = ctx.headers;
+            const inCookies = headers['cookie'];
             headersToRemove.forEach(header => {
                 delete headers[header];
             });
             await page.setExtraHTTPHeaders(headers);
+            if (inCookies) {
+                const cookiesToSet = [];
+                for (let cookieStr of inCookies.split(';')) {
+                    const cookie = tough_cookie.Cookie.parse(cookieStr);
+                    if (!cookie) {
+                        continue;
+                    }
+                    cookiesToSet.push({
+                        name: cookie.key,
+                        value: cookie.value,
+                        sameSite: 'Lax',
+                        domain: parsedUrl.host
+                    });
+                }
+
+                if (cookiesToSet.length > 0)
+                    await page.setCookie(...cookiesToSet);
+            }
             try {
                 let response;
                 let tryCount = 0;
@@ -91,15 +113,16 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
                         ctx.cookies.set(cookie.name, cookie.value, options);
                     });
                 await page.close();
+
+                responseHeadersToRemove.forEach(header => delete responseHeaders[header]);
+                Object.keys(responseHeaders).forEach(header => ctx.set(header, jsesc(responseHeaders[header])));
+                ctx.body = responseBody;
             } catch (error) {
                 if (!error.toString().includes("ERR_BLOCKED_BY_CLIENT")) {
                     ctx.status = 500;
                     ctx.body = error;
                 }
             }
-            responseHeadersToRemove.forEach(header => delete responseHeaders[header]);
-            Object.keys(responseHeaders).forEach(header => ctx.set(header, jsesc(responseHeaders[header])));
-            ctx.body = responseBody;
         }
         else {
             ctx.body = "Please specify the URL in the 'url' query string.";
