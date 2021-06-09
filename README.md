@@ -11,4 +11,4 @@ To show the browser window, set the environment variable `PUPPETEER_HEADFUL=1`. 
 set the `PUPPETEER_PROXY` environment variable, for example `PUPPETEER_PROXY=localhost:8080`.
 
 # Docker
-Available as a Docker image here: https://hub.docker.com/r/unixfox/pupflare
+Available as a Docker image here: https://quay.io/repository/unixfox/pupflare
