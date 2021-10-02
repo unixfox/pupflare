@@ -81,12 +81,13 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
                 responseBody = await response.text();
                 responseData = await response.buffer();
                 while (responseBody.includes("cf-browser-verification") && tryCount <= 10) {
-                    response = await page.waitForNavigation({ timeout: 30000, waitUntil: 'domcontentloaded' });
+                    newResponse = await page.waitForNavigation({ timeout: 30000, waitUntil: 'domcontentloaded' });
+                    if (newResponse) response = newResponse;
                     responseBody = await response.text();
                     responseData = await response.buffer();
                     tryCount++;
                 }
-                responseHeaders = response.headers();
+                responseHeaders = await response.headers();
                 const cookies = await page.cookies();
                 if (cookies)
                     cookies.forEach(cookie => {
