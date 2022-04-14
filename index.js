@@ -13,10 +13,45 @@ const headersToRemove = [
 ];
 const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive", "Connection", "content-encoding", "set-cookie"];
 
+// Increase the performance
+const browser_args = [
+  '--autoplay-policy=user-gesture-required',
+  '--disable-background-networking',
+  '--disable-background-timer-throttling',
+  '--disable-backgrounding-occluded-windows',
+  '--disable-breakpad',
+  '--disable-client-side-phishing-detection',
+  '--disable-component-update',
+  '--disable-default-apps',
+  '--disable-dev-shm-usage',
+  '--disable-domain-reliability',
+  '--disable-extensions',
+  '--disable-features=AudioServiceOutOfProcess',
+  '--disable-hang-monitor',
+  '--disable-ipc-flooding-protection',
+  '--disable-notifications',
+  '--disable-offer-store-unmasked-wallet-cards',
+  '--disable-popup-blocking',
+  '--disable-print-preview',
+  '--disable-prompt-on-repost',
+  '--disable-renderer-backgrounding',
+  '--disable-speech-api',
+  '--disable-sync',
+  '--hide-scrollbars',
+  '--disable-gpu'
+  '--metrics-recording-only',
+  '--mute-audio',
+  '--no-default-browser-check',
+  '--no-first-run',
+  '--no-pings',
+  '--no-zygote',
+  '--password-store=basic',
+  '--use-mock-keychain',
+];
 (async () => {
     let options = {
         headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: ['--no-sandbox', '--disable-setuid-sandbox',...browser_args]
     };
     if (process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD)
         options.executablePath = '/usr/bin/chromium-browser';
