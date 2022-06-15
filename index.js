@@ -22,6 +22,8 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
         options.executablePath = '/usr/bin/chromium-browser';
     if (process.env.PUPPETEER_HEADFUL)
         options.headless = false;
+    if (process.env.PUPPETEER_USERDATADIR)
+        options.userDataDir = process.env.PUPPETEER_USERDATADIR;
     if (process.env.PUPPETEER_PROXY)
         options.args.push(`--proxy-server=${process.env.PUPPETEER_PROXY}`);
     const browser = await puppeteer.launch(options);
