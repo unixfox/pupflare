@@ -14,8 +14,8 @@
     "jsesc": "^3.0.2",
     "koa": "^2.13.4",
     "koa-bodyparser": "^4.3.0",
-    "puppeteer": "^14.0.0",
-    "puppeteer-extra": "^3.2.3",
-    "puppeteer-extra-plugin-stealth": "^2.9.0"
+    "puppeteer": "^18.0.5",
+    "puppeteer-extra": "^3.3.4",
+    "puppeteer-extra-plugin-stealth": "^2.11.1"
   }
 }
