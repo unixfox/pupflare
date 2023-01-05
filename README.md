@@ -12,3 +12,8 @@ set the `PUPPETEER_PROXY` environment variable, for example `PUPPETEER_PROXY=loc
 
 # Docker
 Available as a Docker image here: https://quay.io/repository/unixfox/pupflare
+
+
+```
+docker run -d -p 3000:3000 quay.io/unixfox/pupflare
+```
