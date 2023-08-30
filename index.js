@@ -15,7 +15,7 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
 
 (async () => {
     let options = {
-        headless: true,
+        headless: "new",
         args: ['--no-sandbox', '--disable-setuid-sandbox']
     };
     if (process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD)
