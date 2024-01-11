@@ -12,9 +12,9 @@
   "license": "ISC",
   "dependencies": {
     "jsesc": "^3.0.2",
-    "koa": "^2.14.2",
+    "koa": "^2.15.0",
     "koa-bodyparser": "^4.4.1",
-    "puppeteer": "^21.1.1",
+    "puppeteer": "^21.7.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2"
   }
