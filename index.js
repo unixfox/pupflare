@@ -30,6 +30,9 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
     app.use(async ctx => {
         if (ctx.query.url) {
             const url = decodeURIComponent(ctx.url.replace("/?url=", ""));
+            if (process.env.DEBUG) {
+                console.log(`[DEBUG] URL: ${url}`);
+            }
             let responseBody;
             let responseData;
             let responseHeaders;
@@ -43,6 +46,9 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
             });
             page.on('request', (request) => {
                 requestHeaders = Object.assign({}, request.headers(), requestHeaders);
+                if (process.env.DEBUG) {
+                    console.log(`[DEBUG] requested headers: \n${JSON.stringify(requestHeaders)}`);
+                }
                 if (ctx.method == "POST") {
                     request.continue({
                         headers: requestHeaders,
@@ -110,6 +116,12 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
             await page.close();
             responseHeadersToRemove.forEach(header => delete responseHeaders[header]);
             Object.keys(responseHeaders).forEach(header => ctx.set(header, jsesc(responseHeaders[header])));
+            if (process.env.DEBUG) {
+                console.log(`[DEBUG] response headers: \n${JSON.stringify(responseHeaders)}`);
+            }
+            if (process.env.DEBUG_BODY) {
+                console.log(`[DEBUG] body: \n${responseData}`);
+            }
             ctx.body = responseData;
         }
         else {
