@@ -7,8 +7,8 @@ const app = new Koa();
 app.use(bodyParser());
 const jsesc = require('jsesc');
 
-const headersToRemove = [
-    "host", "user-agent", "accept", "accept-encoding", "content-length",
+const requestHeadersToRemove = [
+    "host", "user-agent", "accept-encoding", "content-length",
     "forwarded", "x-forwarded-proto", "x-forwarded-for", "x-cloud-trace-context"
 ];
 const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive", "Connection", "content-encoding", "set-cookie"];
@@ -29,22 +29,31 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
     const browser = await puppeteer.launch(options);
     app.use(async ctx => {
         if (ctx.query.url) {
-            const url = ctx.url.replace("/?url=", "");
+            const url = decodeURIComponent(ctx.url.replace("/?url=", ""));
             let responseBody;
             let responseData;
             let responseHeaders;
             const page = await browser.newPage();
-            if (ctx.method == "POST") {
-                await page.removeAllListeners('request');
-                await page.setRequestInterception(true);
-                page.on('request', interceptedRequest => {
-                    var data = {
+
+            await page.removeAllListeners('request');
+            await page.setRequestInterception(true);
+            let requestHeaders = ctx.headers;
+            requestHeadersToRemove.forEach(header => {
+                delete requestHeaders[header];
+            });
+            page.on('request', (request) => {
+                requestHeaders = Object.assign({}, request.headers(), requestHeaders);
+                if (ctx.method == "POST") {
+                    request.continue({
+                        headers: requestHeaders,
                         'method': 'POST',
                         'postData': ctx.request.rawBody
-                    };
-                    interceptedRequest.continue(data);
-                });
-            }
+                    });
+                } else {
+                    request.continue({ headers: requestHeaders });
+                }
+            });
+
             const client = await page.target().createCDPSession();
             await client.send('Network.setRequestInterception', {
                 patterns: [{
@@ -71,11 +80,6 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
                 if (e.isDownload)
                     await page.close();
             });
-            let headers = ctx.headers;
-            headersToRemove.forEach(header => {
-                delete headers[header];
-            });
-            await page.setExtraHTTPHeaders(headers);
             try {
                 let response;
                 let tryCount = 0;
