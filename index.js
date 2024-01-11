@@ -112,5 +112,5 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
             ctx.body = "Please specify the URL in the 'url' query string.";
         }
     });
-    app.listen(process.env.PORT || 3000);
+    app.listen(process.env.PORT || 3000, process.env.ADDRESS || "::");
 })();
