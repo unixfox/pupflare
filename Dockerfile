@@ -1,4 +1,4 @@
-FROM node:14-alpine
+FROM node:20-alpine
 RUN apk add --no-cache \
       chromium \
       nss \
@@ -8,6 +8,7 @@ RUN apk add --no-cache \
       ca-certificates \
       ttf-freefont
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
+ENV PUPPETEER_EXECUTABLE_PATH /usr/bin/chromium-browser
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
