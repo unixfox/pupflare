@@ -1,4 +1,4 @@
-name: Docker build tor single hop image
+name: Docker build image
 
 on:
   workflow_dispatch:
