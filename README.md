@@ -7,13 +7,23 @@
 Send your request to the server with the port 3000 and add your URL to the "url" query string like this:
 `http://localhost:3000/?url=https://example.org`
 
-To show the browser window, set the environment variable `PUPPETEER_HEADFUL=1`. To use a proxy,
-set the `PUPPETEER_PROXY` environment variable, for example `PUPPETEER_PROXY=localhost:8080`. To specify user data directory, set `PUPPETEER_USERDATADIR=/path/to/dir`.
+This script has been configured to wait for the cloudflare challenge to pass but, you can configure the "match" for anything else using the environment variable `CHALLENGE_MATCH`.  
+If the website that you are targeting have a protection page with "please wait" in the HTML code then launch the script like this:
+```
+CHALLENGE_MATCH="please wait" npm start
+```
+
+To show the browser window, set the environment variable `PUPPETEER_HEADFUL=1`.
+
+To use a proxy,
+set the `PUPPETEER_PROXY` environment variable, for example `PUPPETEER_PROXY=localhost:8080`.
+
+To specify user data directory, set `PUPPETEER_USERDATADIR=/path/to/dir`.
 
 To enable debugging: `DEBUG=true` and debugging with body in the logs: `DEBUG_BODY=true`
 
 # Docker
-Available as a Docker image here: https://quay.io/repository/unixfox/pupflare
+Available as a Docker image here: https://quay.io/repository/unixfox/pupflare (linux/amd64,linux/arm/v7,linux/arm64)
 
 
 ```

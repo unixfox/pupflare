@@ -90,9 +90,10 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
                 let response;
                 let tryCount = 0;
                 response = await page.goto(url, { timeout: 30000, waitUntil: 'domcontentloaded' });
+                ctx.status = response.status();
                 responseBody = await response.text();
                 responseData = await response.buffer();
-                while (responseBody.includes("challenge-running") && tryCount <= 10) {
+                while (responseBody.includes(process.env.CHALLENGE_MATCH || "challenge-platform") && tryCount <= 10) {
                     newResponse = await page.waitForNavigation({ timeout: 30000, waitUntil: 'domcontentloaded' });
                     if (newResponse) response = newResponse;
                     responseBody = await response.text();
@@ -114,8 +115,10 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
             }
 
             await page.close();
-            responseHeadersToRemove.forEach(header => delete responseHeaders[header]);
-            Object.keys(responseHeaders).forEach(header => ctx.set(header, jsesc(responseHeaders[header])));
+            if (responseHeaders) {
+                responseHeadersToRemove.forEach(header => delete responseHeaders[header]);
+                Object.keys(responseHeaders).forEach(header => ctx.set(header, jsesc(responseHeaders[header])));
+            }
             if (process.env.DEBUG) {
                 console.log(`[DEBUG] response headers: \n${JSON.stringify(responseHeaders)}`);
             }
