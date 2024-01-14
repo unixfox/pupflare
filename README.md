@@ -23,7 +23,7 @@ To specify user data directory, set `PUPPETEER_USERDATADIR=/path/to/dir`.
 To enable debugging: `DEBUG=true` and debugging with body in the logs: `DEBUG_BODY=true`
 
 # Docker
-Available as a Docker image here: https://quay.io/repository/unixfox/pupflare (linux/amd64,linux/arm/v7,linux/arm64)
+Available as a Docker image here: https://quay.io/repository/unixfox/pupflare (linux/amd64,linux/arm64)
 
 
 ```
