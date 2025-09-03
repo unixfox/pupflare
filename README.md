@@ -7,6 +7,9 @@
 2. `npm install`
 3. `npm start`
 
+## Anti-Detection Technology
+This project uses [rebrowser-puppeteer](https://github.com/rebrowser/rebrowser-puppeteer) to provide stealth capabilities and avoid automation detection. This is a modern replacement for the deprecated `puppeteer-extra-plugin-stealth` package.
+
 # How to use
 Send your request to the server with the port 3000 and add your URL to the "url" query string like this:
 `http://localhost:3000/?url=https://example.org`
