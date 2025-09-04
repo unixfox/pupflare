@@ -1,4 +1,9 @@
-const puppeteer = require('puppeteer');
+const {addExtra} = require('puppeteer-extra');
+const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const rebrowserPuppeteer = require('rebrowser-puppeteer');
+
+const puppeteer = addExtra(rebrowserPuppeteer);
+puppeteer.use(StealthPlugin());
 const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
 const app = new Koa();
@@ -17,8 +22,11 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
         args: [
             '--no-sandbox', 
             '--disable-setuid-sandbox',
-            '--disable-blink-features=AutomationControlled',
-            '--disable-features=VizDisplayCompositor'
+            '--disable-blink-features=AutomationControlled'
+        ],
+        ignoreDefaultArgs: [
+            '--enable-automation',
+            '--disable-popup-blocking'
         ]
     };
     if (process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD)
@@ -40,42 +48,6 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
             let responseData;
             let responseHeaders;
             const page = await browser.newPage();
-
-            // Apply stealth patches to enhance rebrowser-puppeteer functionality
-            await page.evaluateOnNewDocument(() => {
-                // Hide webdriver property
-                Object.defineProperty(navigator, 'webdriver', {
-                    get: () => undefined,
-                });
-
-                // Add chrome runtime object
-                if (!window.chrome) {
-                    window.chrome = {
-                        runtime: {},
-                        loadTimes: function() {},
-                        csi: function() {},
-                        app: {}
-                    };
-                }
-
-                // Mock permissions API
-                const originalQuery = window.navigator.permissions.query;
-                window.navigator.permissions.query = (parameters) => (
-                    parameters.name === 'notifications' ?
-                        Promise.resolve({ state: 'granted' }) :
-                        originalQuery(parameters)
-                );
-
-                // Enhance plugins list
-                Object.defineProperty(navigator, 'plugins', {
-                    get: () => [1, 2, 3, 4, 5]
-                });
-
-                // Ensure languages are set
-                Object.defineProperty(navigator, 'languages', {
-                    get: () => ['en-US', 'en']
-                });
-            });
 
             await page.removeAllListeners('request');
             await page.setRequestInterception(true);
