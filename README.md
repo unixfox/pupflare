@@ -7,6 +7,14 @@
 2. `npm install`
 3. `npm start`
 
+## Anti-Detection Technology
+This project combines multiple stealth technologies for enhanced anti-detection capabilities:
+
+- **[rebrowser-puppeteer](https://github.com/rebrowser/rebrowser-puppeteer)** - Provides direct browser-level stealth modifications and patches Puppeteer at the core level
+- **[puppeteer-extra-stealth](https://github.com/berstend/puppeteer-extra/tree/master/packages/puppeteer-extra-plugin-stealth)** - Plugin-based stealth enhancements with proven track record
+
+By using both technologies together, pupflare provides multiple layers of protection against automation detection, offering superior stealth capabilities compared to using either technology alone.
+
 # How to use
 Send your request to the server with the port 3000 and add your URL to the "url" query string like this:
 `http://localhost:3000/?url=https://example.org`

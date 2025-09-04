@@ -1,5 +1,8 @@
-const puppeteer = require('puppeteer-extra');
+const {addExtra} = require('puppeteer-extra');
 const StealthPlugin = require('puppeteer-extra-plugin-stealth');
+const rebrowserPuppeteer = require('rebrowser-puppeteer');
+
+const puppeteer = addExtra(rebrowserPuppeteer);
 puppeteer.use(StealthPlugin());
 const Koa = require('koa');
 const bodyParser = require('koa-bodyparser');
@@ -16,7 +19,15 @@ const responseHeadersToRemove = ["Accept-Ranges", "Content-Length", "Keep-Alive"
 (async () => {
     let options = {
         headless: "new",
-        args: ['--no-sandbox', '--disable-setuid-sandbox']
+        args: [
+            '--no-sandbox', 
+            '--disable-setuid-sandbox',
+            '--disable-blink-features=AutomationControlled'
+        ],
+        ignoreDefaultArgs: [
+            '--enable-automation',
+            '--disable-popup-blocking'
+        ]
     };
     if (process.env.PUPPETEER_SKIP_CHROMIUM_DOWNLOAD)
         options.executablePath = '/usr/bin/chromium-browser';

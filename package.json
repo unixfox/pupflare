@@ -16,6 +16,7 @@
     "koa-bodyparser": "^4.4.1",
     "puppeteer": "^24.18.0",
     "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "rebrowser-puppeteer": "^24.8.1"
   }
 }
