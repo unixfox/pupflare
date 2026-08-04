@@ -1,7 +1,3 @@
-# Sponsor
-
-<a href="https://www.capsolver.com/?utm_source=github&utm_medium=repo&utm_campaign=scraping&utm_term=pupflare"><img src="https://github.com/unixfox/pupflare/assets/4016501/d1b66c77-16b8-455b-aefd-e07ecbed98d4" width="600" /></a>
-
 # How to launch pupflare
 1. Install NodeJS
 2. `npm install`
