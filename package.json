@@ -1,21 +1,33 @@
 {
   "name": "pupflare",
-  "version": "1.0.0",
-  "description": "",
+  "version": "2.0.0",
+  "description": "A proxy server that bypasses Cloudflare and other anti-bot challenges using Camoufox (an anti-detection Firefox).",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node index.js"
+    "test": "node --test",
+    "test:integration": "RUN_INTEGRATION=1 node --test test/integration.test.js",
+    "start": "node index.js",
+    "postinstall": "camoufox-js fetch || echo 'skipped camoufox fetch (run: npx camoufox-js fetch)'"
   },
-  "keywords": [],
+  "keywords": [
+    "cloudflare",
+    "bypass",
+    "camoufox",
+    "playwright",
+    "proxy",
+    "anti-bot"
+  ],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=18"
+  },
   "dependencies": {
+    "camoufox-js": "^0.12.0",
     "jsesc": "^3.1.0",
-    "koa": "^3.0.1",
+    "koa": "^3.2.1",
     "koa-bodyparser": "^4.4.1",
-    "puppeteer": "^25.3.0",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "playwright-core": "^1.60.0"
   }
 }
