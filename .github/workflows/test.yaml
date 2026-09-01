@@ -52,7 +52,7 @@ jobs:
         run: npx --yes playwright@latest install-deps firefox
 
       - name: Cache Camoufox browser
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/camoufox
           key: camoufox-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
