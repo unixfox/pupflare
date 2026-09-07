@@ -1,5 +1,5 @@
 # ---- build stage: compile native deps (better-sqlite3) and fetch the browser ----
-FROM node:24-bookworm-slim AS builder
+FROM node:26-bookworm-slim AS builder
 
 # Toolchain required by node-gyp to build better-sqlite3 (a camoufox-js dependency)
 # when no prebuilt binary is available for the target platform.
@@ -20,7 +20,7 @@ COPY package*.json ./
 RUN npm ci --omit=dev && npx camoufox-js fetch
 
 # ---- runtime stage: Firefox runtime libraries only, no build toolchain ----
-FROM node:24-bookworm-slim
+FROM node:26-bookworm-slim
 
 # Camoufox is a patched Firefox (glibc) build, so we need the standard Firefox
 # runtime libraries. (Alpine/musl is not supported by the Camoufox binaries.)
